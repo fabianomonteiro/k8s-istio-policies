@@ -10,10 +10,10 @@ spec:
   configPatches:
     - applyTo: VIRTUAL_HOST
       match:
-        context: SIDECAR_OUTBOUND
+        context: SIDECAR_INBOUND
         routeConfiguration:
           vhost:
-            name: "outbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"
+            name: "inbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"
             # Certifique-se de que o vhost corresponda ao serviço de origem "crm"
       patch:
         operation: MERGE
@@ -26,18 +26,11 @@ spec:
               route:
                 prefix_rewrite: "/route-destionation/path-destination"
                 cluster: "outbound|microservice-destination-port||microservice-destination-name.develop.svc.cluster.local"
-
-    - applyTo: VIRTUAL_HOST
+    - applyTo: BOOTSTRAP
       match:
-        context: SIDECAR_OUTBOUND
-        routeConfiguration:
-          vhost:
-            name: "outbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"
+        context: SIDECAR_INBOUND
       patch:
         operation: MERGE
         value:
-          routes:
-            - match:
-                prefix: "/microservice-origin-name"
-              route:
-                cluster: "outbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"
+          node:
+            log_level: debug

@@ -1,0 +1,43 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: microservice-origin-name
+  namespace: develop
+spec:
+  workloadSelector:
+    labels:
+      app: microservice-origin-name  # Certifique-se de que o label corresponde ao microserviço de origem
+  configPatches:
+    - applyTo: VIRTUAL_HOST
+      match:
+        context: SIDECAR_OUTBOUND
+        routeConfiguration:
+          vhost:
+            name: "outbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"
+            # Certifique-se de que o vhost corresponda ao serviço de origem "crm"
+      patch:
+        operation: MERGE
+        value:
+          routes:
+            - match:
+                safe_regex:
+                  google_re2: {}
+                  regex: "^/microservice-origin-name/v1/customer/[^/]+/accounts/[^/]+/statement/v2/statements.*$"
+              route:
+                prefix_rewrite: "/route-destionation/path-destination"
+                cluster: "outbound|microservice-destination-port||microservice-destination-name.develop.svc.cluster.local"
+
+    - applyTo: VIRTUAL_HOST
+      match:
+        context: SIDECAR_OUTBOUND
+        routeConfiguration:
+          vhost:
+            name: "outbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"
+      patch:
+        operation: MERGE
+        value:
+          routes:
+            - match:
+                prefix: "/microservice-origin-name"
+              route:
+                cluster: "outbound|microservice-origin-port||microservice-origin-name.develop.svc.cluster.local"

@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: add-prefix-filter
+  namespace: default
+spec:
+  workloadSelector:
+    labels:
+      app: [NOME_DO_MICROSERVIÇO_DE_ORIGEM]  # Substitua pelo nome do microserviço de origem
+  configPatches:
+    - applyTo: HTTP_ROUTE
+      match:
+        context: SIDECAR_OUTBOUND
+        routeConfiguration:
+          vhost:
+            name: "outbound|[PORTA_DO_MICROSERVIÇO_DE_ORIGEM]||[NOME_DO_MICROSERVIÇO_DE_DESTINO].default.svc.cluster.local"
+            # Substitua [PORTA_DO_MICROSERVIÇO_DE_ORIGEM] pela porta do microserviço de origem
+            # Substitua [NOME_DO_MICROSERVIÇO_DE_DESTINO] pelo nome do microserviço de destino
+            route:
+              action: route
+      patch:
+        operation: MERGE
+        value:
+          route:
+            match:
+              safe_regex:
+                regex: "^/api/v2/orders/[^/]+/details/[^/]+/summary.*$"
+                # Substitua pela rota que deseja capturar, usando regex para os parâmetros dinâmicos
+            prefix_rewrite: "/newprefix/api/v2/orders"
+            # Substitua "/newprefix/api/v2/orders" pelo prefixo que deseja adicionar à rota
+            route:
+              cluster: "outbound|[PORTA_DO_MICROSERVIÇO_DE_DESTINO]||[NOME_DO_MICROSERVIÇO_DE_DESTINO].default.svc.cluster.local"
+              # Substitua [PORTA_DO_MICROSERVIÇO_DE_DESTINO] pela porta do microserviço de destino

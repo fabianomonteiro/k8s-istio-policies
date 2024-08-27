@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prefix-rewrite
+  namespace: <namespace>
+spec:
+  hosts:
+    - <host-new-service>
+  http:
+    - match:
+        - uri:
+            prefix: "/service"
+      rewrite:
+        uri: "/newservice/serivce/"
+      route:
+        - destination:
+            host: <host-new-service>
+            port:
+              number: <port-new-service>

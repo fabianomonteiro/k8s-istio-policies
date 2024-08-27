@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: migration-partial-routes
+  namespace: <namespace>
+spec:
+  hosts:
+    - <host-old-service>
+  http:
+    - match:
+        - uri:
+            regex: "^/service/v1/customer/(.*)/accounts/(.*)/statement/v2/statements$"
+      route:
+        - destination:
+            host: <host-new-service>
+            port:
+              number: <port-new-service>

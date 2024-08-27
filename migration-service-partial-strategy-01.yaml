@@ -9,7 +9,23 @@ spec:
   http:
     - match:
         - uri:
-            regex: "^/service/v1/customer/(.*)/accounts/(.*)/statement/v2/statements$"
+            regex: "^/service/v1/customer/([^/]+)/accounts/([^/]+)/statement/v2/statements$"
+      route:
+        - destination:
+            host: <host-new-service>
+            port:
+              number: <port-new-service>
+    - match:
+        - uri:
+            prefix: "/route1"
+      route:
+        - destination:
+            host: <host-new-service>
+            port:
+              number: <port-new-service>
+    - match:
+        - uri:
+            exact: "/route1"
       route:
         - destination:
             host: <host-new-service>
